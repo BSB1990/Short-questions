@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Law Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+            position: relative;
+        }
+        button {
+            background-color: #0288d1;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0277bd;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        #examQuestions {
+            margin-top: 20px;
+        }
+        .back-button {
+            display: block;
+            width: 100px;
+            margin: 20px auto 0;
+        }
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #0288d1;
+        }
+        #finishExam {
+            background-color: #F44336;
+            margin-top: 20px;
+        }
+        #finishExam:hover {
+            background-color: #D32F2F;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>EU Law Quiz</h2>
+        <div id="timer" class="hidden">00:00:00</div>
+        <button onclick="startExamSimulation()">Simulación de examen</button>
+        <div id="examQuestions" class="hidden"></div>
+        <button id="finishExam" class="hidden" onclick="finishExam()">Finalizar examen</button>
+        <button id="showExamAnswers" class="hidden" onclick="showExamAnswers()">Mostrar respuestas</button>
+    </div>
+
+    <!-- Botón Back añadido -->
+    <button class="back-button" onclick="window.location.href='index.html'">Back</button>
+
+    <script>
+        const questions = [
+            { question: "What are the main treaties currently in force in the European Union?", answer: "The main treaties currently in force in the EU are: the <strong>Treaty on European Union (TEU)</strong>, the Treaty on the Functioning of the European Union (TFEU), and the Treaty establishing the European Atomic Energy Community (EAEC Treaty)." },
+            { question: "What are the key changes introduced by the Treaty on the Functioning of the European Union (TFEU)?", answer: "The TFEU was developed from the Treaty establishing the European Community and retains a similar structure. Key changes include modifications in the EU's external actions and the introduction of new chapters on energy policy, police and judicial cooperation in criminal matters, astronautics, sport, and tourism." },
+            { question: "Which countries were the founding members of the European Economic Community (EEC)?", answer: "The six founding members of the EEC were Belgium, Germany (including the former GDR after reunification in 1990), France, Italy, Luxembourg, and the Netherlands." }
+        ];
+
+        let timerInterval;
+        let seconds = 0;
+        let minutes = 0;
+        let hours = 0;
+
+        function startTimer() {
+            const timerElement = document.getElementById("timer");
+            timerElement.classList.remove("hidden");
+            
+            // Resetear el cronómetro
+            seconds = 0;
+            minutes = 0;
+            hours = 0;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(function() {
+                seconds++;
+                if (seconds >= 60) {
+                    seconds = 0;
+                    minutes++;
+                    if (minutes >= 60) {
+                        minutes = 0;
+                        hours++;
+                    }
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById("timer");
+            timerElement.textContent = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+        }
+
+        function padZero(num) {
+            return num.toString().padStart(2, '0');
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function startExamSimulation() {
+            const examContainer = document.getElementById("examQuestions");
+            examContainer.innerHTML = "";
+            
+            let selectedQuestions = [];
+            while (selectedQuestions.length < 2) {
+                let randomIndex = Math.floor(Math.random() * questions.length);
+                if (!selectedQuestions.includes(randomIndex)) {
+                    selectedQuestions.push(randomIndex);
+                }
+            }
+
+            selectedQuestions.forEach(index => {
+                let questionBlock = document.createElement("div");
+                questionBlock.innerHTML = `
+                    <p><strong>${questions[index].question}</strong></p>
+                    <input type="text" class="examAnswer" placeholder="Escribe tu respuesta aquí">
+                `;
+                examContainer.appendChild(questionBlock);
+            });
+            
+            examContainer.classList.remove("hidden");
+            document.getElementById("finishExam").classList.remove("hidden");
+            document.getElementById("showExamAnswers").classList.add("hidden");
+            
+            // Iniciar el cronómetro
+            startTimer();
+        }
+
+        function finishExam() {
+            // Detener el cronómetro
+            stopTimer();
+            
+            // Mostrar el botón de respuestas
+            document.getElementById("showExamAnswers").classList.remove("hidden");
+            document.getElementById("finishExam").classList.add("hidden");
+            
+            // Desactivar los campos de entrada
+            const inputs = document.getElementsByClassName("examAnswer");
+            for (let input of inputs) {
+                input.disabled = true;
+            }
+        }
+
+        function showExamAnswers() {
+            const examContainer = document.getElementById("examQuestions");
+            const inputs = examContainer.getElementsByClassName("examAnswer");
+            
+            let index = 0;
+            Array.from(inputs).forEach(input => {
+                let answerIndex = questions.findIndex(q => q.question === input.previousElementSibling.innerText);
+                let correctAnswer = document.createElement("p");
+                correctAnswer.innerHTML = `<strong>Respuesta correcta:</strong> ${questions[answerIndex].answer}`;
+                input.insertAdjacentElement("afterend", correctAnswer);
+                index++;
+            });
+        }
+    </script>
+</body>
+</html>

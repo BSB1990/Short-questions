@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Law Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            text-align: center;
+            padding: 50px;
+            display: flex;
+            justify-content: center;
+        }
+        .main-container {
+            display: flex;
+            max-width: 800px;
+            width: 100%;
+            gap: 20px;
+        }
+        .quiz-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+        .stats-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            text-align: left;
+        }
+        button {
+            background-color: #0288d1;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0277bd;
+        }
+        button:disabled {
+            background-color: #b0bec5;
+            cursor: not-allowed;
+        }
+        .selected {
+            outline: 3px solid #01579b;
+            box-shadow: 0 0 8px rgba(1, 87, 155, 0.6);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .evaluation-buttons {
+            margin-top: 10px;
+        }
+        .evaluation-buttons button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .green { background-color: #4CAF50; }
+        .yellow { background-color: #FFC107; }
+        .red { background-color: #F44336; }
+        #answer {
+            display: none;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #01579b;
+        }
+        .back-button {
+            display: block;
+            width: 100px;
+            margin: 20px auto 0;
+        }
+        #postEvaluationSection {
+            display: none;
+            margin-top: 15px;
+        }
+        #evaluationResult {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .stats-title {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .stat-label {
+            display: flex;
+            align-items: center;
+        }
+        .stat-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .clear-stats {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #757575;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 10px;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .accuracy-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+            color: black;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+        }
+        .next-btn {
+            background-color: #ff6f00;
+            margin-top: 15px;
+            width: 100%;
+        }
+ 	/* Estilo para el botón de historial */
+        .history-button {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #ff5722;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .history-button:hover {
+            background-color: #e64a19;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botón de historial -->
+    <button class="history-button" onclick="viewHistory()">
+        <span style="font-size: 20px;">📋</span><br>
+        Ver Historial
+    </button>
+
+    <div class="main-container">
+        <!-- Contenedor del quiz -->
+        <div class="quiz-container">
+            <h2>EU Law Quiz</h2>
+            <p id="question">Click the button to get a question</p>
+            <button onclick="showQuestion()">Show Short Question (Random)</button>
+            <input type="text" id="userAnswer" placeholder="Type your answer here">
+            
+            <div id="evaluationSection" class="evaluation-buttons" style="display: none;">
+                <p>How do you think you did?</p>
+                <button id="confHigh" class="green" onclick="selectEvaluation('good')">🟢 Well</button>
+                <button id="confMedium" class="yellow" onclick="selectEvaluation('partial')">🟡 Partially Well</button>
+                <button id="confLow" class="red" onclick="selectEvaluation('bad')">🔴 Bad</button>
+            </div>
+
+            <button id="showAnswerButton" onclick="showAnswer()" style="display: none;">Show Sample Answer (From the Book)</button>
+            <p id="answer"></p>
+            
+            <!-- Sección para evaluar después de ver la respuesta -->
+            <div id="postEvaluationSection" class="evaluation-buttons" style="display: none;">
+                <p>After seeing the correct answer, how did you actually do?</p>
+                <button id="resultCorrect" class="green" onclick="postEvaluation('correct')">🟢 Correct</button>
+                <button id="resultPartial" class="yellow" onclick="postEvaluation('partially')">🟡 Partially Correct</button>
+                <button id="resultIncorrect" class="red" onclick="postEvaluation('incorrect')">🔴 Incorrect</button>
+            </div>
+            
+            <p id="evaluationResult"></p>
+            
+            <!-- Botón para siguiente pregunta -->
+            <button id="nextQuestionBtn" class="next-btn" style="display: none;" onclick="showQuestion()">Next Question</button>
+            
+            <!-- Botón Back -->
+            <button class="back-button" onclick="window.location.href='index.html'">Back</button>
+        </div>
+        
+        <!-- Contenedor de estadísticas -->
+        <div class="stats-container">
+            <h3>Your Statistics</h3>
+            
+            <!-- Contador de preguntas -->
+            <div class="stat-row">
+                <span>Questions Answered:</span>
+                <span id="totalQuestions">0</span>
+            </div>
+            
+            <!-- Confianza inicial -->
+            <p class="stats-title">Initial Confidence</p>
+            <div class="stat-row">
+                <span class="stat-label"><span class="stat-circle green"></span> High</span>
+                <span id="highConfidence">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="stat-circle yellow"></span> Medium</span>
+                <span id="mediumConfidence">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="stat-circle red"></span> Low</span>
+                <span id="lowConfidence">0</span>
+            </div>
+            
+            <!-- Resultados finales -->
+            <p class="stats-title">Actual Results</p>
+            <div class="stat-row">
+                <span class="stat-label"><span class="stat-circle green"></span> Correct</span>
+                <span id="correctAnswers">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="stat-circle yellow"></span> Partially</span>
+                <span id="partialAnswers">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label"><span class="stat-circle red"></span> Incorrect</span>
+                <span id="incorrectAnswers">0</span>
+            </div>
+            
+            <!-- Barra de precisión -->
+            <p class="stats-title">Accuracy</p>
+            <div class="progress-bar">
+                <div id="accuracyBar" class="progress-fill green"></div>
+                <div class="accuracy-text" id="accuracyText">0%</div>
+            </div>
+            
+            <!-- Barra de calibración -->
+            <p class="stats-title">Confidence Calibration</p>
+            <div class="progress-bar">
+                <div id="calibrationBar" class="progress-fill blue"></div>
+                <div class="accuracy-text" id="calibrationText">0%</div>
+            </div>
+            
+            <!-- Botón para limpiar estadísticas -->
+            <button class="clear-stats" onclick="clearStats()">Clear Statistics</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { 
+                "question": "What are the main treaties currently in force in the European Union?", 
+                "answer": "The main treaties currently in force in the EU are: the <strong>Treaty on European Union (TEU)</strong>, the Treaty on the Functioning of the European Union (TFEU), and the Treaty establishing the European Atomic Energy Community (EAEC Treaty).", 
+                "page": "19" 
+            },
+            { 
+                "question": "What are the key changes introduced by the Treaty on the Functioning of the European Union (TFEU)?", 
+                "answer": "The TFEU was developed from the Treaty establishing the European Community and retains a similar structure. Key changes include modifications in the EU's external actions and the introduction of new chapters on energy policy, police and judicial cooperation in criminal matters, astronautics, sport, and tourism.", 
+                "page": "19" 
+            },
+            { 
+                "question": "Which countries were the founding members of the European Economic Community (EEC)?", 
+                "answer": "The six founding members of the EEC were Belgium, Germany (including the former GDR after reunification in 1990), France, Italy, Luxembourg, and the Netherlands.", 
+                "page": "20" 
+            },
+        ];
+
+        // Variables para estadísticas
+        let stats = {
+            totalQuestions: 0,
+            confidence: {
+                high: 0,
+                medium: 0,
+                low: 0
+            },
+            results: {
+                correct: 0,
+                partially: 0,
+                incorrect: 0
+            },
+            calibration: {
+                matches: 0
+            }
+        };
+        
+        // Variables para el flujo del quiz
+        let initialEvaluation = "";
+        let currentQuestion = null;
+        let confidenceSelected = false;
+        let resultSelected = false;
+        
+        // Cargar estadísticas guardadas si existen
+        function loadStats() {
+            const savedStats = localStorage.getItem('euLawQuizStats');
+            if (savedStats) {
+                stats = JSON.parse(savedStats);
+                updateStatsDisplay();
+            }
+        }
+        
+        // Guardar estadísticas
+        function saveStats() {
+            localStorage.setItem('euLawQuizStats', JSON.stringify(stats));
+        }
+        
+        // Actualizar la visualización de estadísticas
+        function updateStatsDisplay() {
+            // Actualizar contadores
+            document.getElementById('totalQuestions').textContent = stats.totalQuestions;
+            
+            // Confianza
+            document.getElementById('highConfidence').textContent = stats.confidence.high;
+            document.getElementById('mediumConfidence').textContent = stats.confidence.medium;
+            document.getElementById('lowConfidence').textContent = stats.confidence.low;
+            
+            // Resultados
+            document.getElementById('correctAnswers').textContent = stats.results.correct;
+            document.getElementById('partialAnswers').textContent = stats.results.partially;
+            document.getElementById('incorrectAnswers').textContent = stats.results.incorrect;
+            
+            // Cálculo de precisión
+            const totalResultQuestions = stats.results.correct + stats.results.partially + stats.results.incorrect;
+            let accuracy = 0;
+            if (totalResultQuestions > 0) {
+                accuracy = Math.round(((stats.results.correct + (stats.results.partially * 0.5)) / totalResultQuestions) * 100);
+            }
+            
+            // Actualizar barra de precisión
+            const accuracyBar = document.getElementById('accuracyBar');
+            accuracyBar.style.width = accuracy + '%';
+            document.getElementById('accuracyText').textContent = accuracy + '%';
+            
+            // Color de la barra de precisión
+            if (accuracy >= 70) {
+                accuracyBar.className = 'progress-fill green';
+            } else if (accuracy >= 40) {
+                accuracyBar.className = 'progress-fill yellow';
+            } else {
+                accuracyBar.className = 'progress-fill red';
+            }
+            
+            // Cálculo de calibración (qué tan bien se autoevalúa)
+            let calibration = 0;
+            if (stats.totalQuestions > 0) {
+                calibration = Math.round((stats.calibration.matches / stats.totalQuestions) * 100);
+            }
+            
+            // Actualizar barra de calibración
+            const calibrationBar = document.getElementById('calibrationBar');
+            calibrationBar.style.width = calibration + '%';
+            document.getElementById('calibrationText').textContent = calibration + '%';
+            
+            // Color de la barra de calibración
+            if (calibration >= 70) {
+                calibrationBar.className = 'progress-fill green';
+            } else if (calibration >= 40) {
+                calibrationBar.className = 'progress-fill yellow';
+            } else {
+                calibrationBar.className = 'progress-fill red';
+            }
+        }
+        
+        // Limpiar estadísticas
+        function clearStats() {
+            stats = {
+                totalQuestions: 0,
+                confidence: {
+                    high: 0,
+                    medium: 0,
+                    low: 0
+                },
+                results: {
+                    correct: 0,
+                    partially: 0,
+                    incorrect: 0
+                },
+                calibration: {
+                    matches: 0
+                }
+            };
+            saveStats();
+            updateStatsDisplay();
+        }
+
+        // Array para almacenar el historial
+        let quizHistory = JSON.parse(localStorage.getItem('euLawQuizHistory')) || [];
+
+        function showQuestion() {
+            const randomIndex = Math.floor(Math.random() * questions.length);
+            currentQuestion = questions[randomIndex]; // Asignamos la pregunta actual
+            document.getElementById("question").innerText = currentQuestion.question;
+            document.getElementById("answer").innerHTML = "";
+            document.getElementById("answer").style.display = "none";
+            document.getElementById("userAnswer").value = ""; // Limpiar la respuesta anterior
+            
+            // Reiniciar todas las secciones de evaluación
+            document.getElementById("evaluationSection").style.display = "block";
+            document.getElementById("showAnswerButton").style.display = "none";
+            document.getElementById("postEvaluationSection").style.display = "none";
+            document.getElementById("evaluationResult").style.display = "none";
+            document.getElementById("nextQuestionBtn").style.display = "none";
+            
+            // Reiniciar estado de selección
+            initialEvaluation = "";
+            confidenceSelected = false;
+            resultSelected = false;
+            
+            // Quitar clase 'selected' de todos los botones
+            document.getElementById("confHigh").classList.remove("selected");
+            document.getElementById("confMedium").classList.remove("selected");
+            document.getElementById("confLow").classList.remove("selected");
+            
+            // Habilitar todos los botones de confianza
+            document.getElementById("confHigh").disabled = false;
+            document.getElementById("confMedium").disabled = false;
+            document.getElementById("confLow").disabled = false;
+        }
+
+        function selectEvaluation(level) {
+            // Si ya se seleccionó una opción, no hacer nada
+            if (confidenceSelected) return;
+            
+            initialEvaluation = level;
+            confidenceSelected = true;
+            
+            // Marcar el botón seleccionado y deshabilitar los otros
+            const buttons = {
+                "good": document.getElementById("confHigh"),
+                "partial": document.getElementById("confMedium"),
+                "bad": document.getElementById("confLow")
+            };
+            
+            // Añadir clase 'selected' al botón elegido
+            buttons[level].classList.add("selected");
+            
+            // Deshabilitar todos los botones de confianza
+            for (const key in buttons) {
+                if (key !== level) {
+                    buttons[key].disabled = true;
+                }
+            }
+            
+            // Actualizar estadísticas de confianza
+            if (level === "good") {
+                stats.confidence.high++;
+            } else if (level === "partial") {
+                stats.confidence.medium++;
+            } else if (level === "bad") {
+                stats.confidence.low++;
+            }
+            
+            saveStats();
+            updateStatsDisplay();
+            
+            console.log("User initial evaluation:", level);
+
+            // Mostrar el botón para ver la respuesta
+            document.getElementById("showAnswerButton").style.display = "block";
+        }
+
+        function showAnswer() {
+            if (currentQuestion) {
+                document.getElementById("answer").innerHTML = `Answer: ${currentQuestion.answer} <br><strong>Page:</strong> ${currentQuestion.page}`;
+                document.getElementById("answer").style.display = "block";
+                
+                // Mostrar la sección de evaluación posterior
+                document.getElementById("postEvaluationSection").style.display = "block";
+                
+                // Resetear el estado de selección de resultado
+                document.getElementById("resultCorrect").classList.remove("selected");
+                document.getElementById("resultPartial").classList.remove("selected");
+                document.getElementById("resultIncorrect").classList.remove("selected");
+                
+                document.getElementById("resultCorrect").disabled = false;
+                document.getElementById("resultPartial").disabled = false;
+                document.getElementById("resultIncorrect").disabled = false;
+            }
+        }
+        
+        function postEvaluation(accuracy) {
+            // Si ya se seleccionó una opción, no hacer nada
+            if (resultSelected) return;
+            
+            resultSelected = true;
+            
+            // Marcar el botón seleccionado y deshabilitar los otros
+            const buttons = {
+                "correct": document.getElementById("resultCorrect"),
+                "partially": document.getElementById("resultPartial"),
+                "incorrect": document.getElementById("resultIncorrect")
+            };
+            
+            // Añadir clase 'selected' al botón elegido
+            buttons[accuracy].classList.add("selected");
+            
+            // Deshabilitar todos los botones de resultado
+            for (const key in buttons) {
+                if (key !== accuracy) {
+                    buttons[key].disabled = true;
+                }
+            }
+            
+            let resultMessage = "";
+            let resultColor = "";
+            let isCalibrated = false;
+            
+            // Actualizar contador de preguntas totales
+            stats.totalQuestions++;
+            
+            // Actualizar estadísticas de resultados
+            if (accuracy === "correct") {
+                stats.results.correct++;
+            } else if (accuracy === "partially") {
+                stats.results.partially++;
+            } else if (accuracy === "incorrect") {
+                stats.results.incorrect++;
+            }
+            
+            // Comparar la evaluación inicial con la evaluación posterior
+           if (initialEvaluation === "good" && accuracy === "correct") {
+    		resultMessage = "Excellent! Your confidence was justified.";
+    		resultColor = "#4CAF50"; // green
+    		isCalibrated = true;
+	  } else if (initialEvaluation === "good" && accuracy !== "correct") {
+    		resultMessage = "You overestimated your knowledge. Review this question more carefully.";
+    		resultColor = "#F44336"; // red
+	  } else if (initialEvaluation === "bad" && accuracy !== "incorrect") {
+    		resultMessage = "You underestimated your knowledge. Trust yourself more!";
+    		resultColor = "#FFC107"; // yellow
+	  } else if (initialEvaluation === "partial" && accuracy === "partially") {
+    		resultMessage = "Good self-assessment. You know your strengths and weaknesses.";
+    		resultColor = "#4CAF50"; // green
+    		isCalibrated = true;
+ 	  } else if (initialEvaluation === "partial" && accuracy === "correct") {
+    		resultMessage = "You underestimated your knowledge. Trust yourself more!";
+    		resultColor = "#FFC107"; // yellow
+ 	  } else if (initialEvaluation === "partial" && accuracy === "incorrect") {
+    		resultMessage = "You overestimated your knowledge. Review this question more carefully.";
+    		resultColor = "#F44336"; // red
+	  } else if (initialEvaluation === "bad" && accuracy === "incorrect") {
+    		resultMessage = "Your self-assessment matches your actual performance.";
+   	        resultColor = "#0288d1"; // blue
+            isCalibrated = true;
+	  }
+            
+            // Actualizar estadísticas de calibración
+            if (isCalibrated) {
+                stats.calibration.matches++;
+            }
+            
+            // Guardar en el historial antes de actualizar stats
+            saveToHistory(accuracy, resultMessage);
+            
+            saveStats();
+            updateStatsDisplay();
+            
+            document.getElementById("evaluationResult").innerHTML = resultMessage;
+            document.getElementById("evaluationResult").style.color = resultColor;
+            document.getElementById("evaluationResult").style.display = "block";
+            
+            // Mostrar botón para siguiente pregunta
+            document.getElementById("nextQuestionBtn").style.display = "block";
+            
+            console.log("Initial evaluation:", initialEvaluation, "Actual performance:", accuracy);
+        }
+        
+        // Función para guardar en el historial
+        function saveToHistory(accuracy, resultMessage) {
+            const userAnswer = document.getElementById("userAnswer").value;
+            
+            const historyEntry = {
+                date: new Date().toLocaleString(),
+                question: currentQuestion.question,
+                userAnswer: userAnswer,
+                correctAnswer: currentQuestion.answer,
+                selfEvaluation: initialEvaluation,
+                actualEvaluation: accuracy,
+                feedback: resultMessage
+            };
+            
+            quizHistory.push(historyEntry);
+            localStorage.setItem('euLawQuizHistory', JSON.stringify(quizHistory));
+            console.log("Entry saved to history:", historyEntry);
+        }
+
+        // Función para ver el historial
+        function viewHistory() {
+            // Guardamos el historial en localStorage para acceder desde la página de historial
+            window.location.href = 'Historial preguntas cortas.html';
+        }
+        
+        // Cargar estadísticas al iniciar
+        loadStats();
+    </script>
+</body>
+</html>

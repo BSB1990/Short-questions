@@ -1,0 +1,207 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz History - EU Law</title>
+    <style>
+        /* Estilos */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #01579b;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: auto;
+        }
+        .history-item {
+            border-bottom: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .question {
+            font-weight: bold;
+            color: #01579b;
+            margin-bottom: 10px;
+        }
+        .answer-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .user-answer, .correct-answer {
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-answer {
+            background-color: #f5f5f5;
+        }
+        .correct-answer {
+            background-color: #e8f5e9;
+        }
+        .evaluation {
+            margin-top: 10px;
+        }
+        .evaluation-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        .good { background-color: #4CAF50; }
+        .partial { background-color: #FFC107; color: black; }
+        .bad { background-color: #F44336; }
+        .correct { background-color: #4CAF50; }
+        .partially { background-color: #FFC107; color: black; }
+        .incorrect { background-color: #F44336; }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 5px;
+        }
+        .date {
+            color: #616161;
+            font-size: 0.8em;
+            margin-top: 5px;
+            text-align: right;
+        }
+        .back-button {
+            display: block;
+            background-color: #0288d1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 20px auto;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .back-button:hover {
+            background-color: #0277bd;
+        }
+        .no-history {
+            text-align: center;
+            padding: 30px;
+            color: #616161;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EU Law Quiz - Track record</h1>
+        <div id="historyContainer">
+            <!-- El historial se cargará aquí dinámicamente -->
+        </div>
+        <button class="back-button" onclick="window.location.href='index.html'">Back to the questions</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+
+        function loadHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            const quizHistory = JSON.parse(localStorage.getItem('euLawQuizHistory')) || [];
+            
+            if (quizHistory.length === 0) {
+                historyContainer.innerHTML = '<div class="no-history">No history available yet. Answer some questions first.</div>';
+                return;
+            }
+
+            // Mostrar el historial en orden inverso (más reciente primero)
+            const historyHTML = quizHistory.reverse().map((entry, index) => {
+                return `
+                <div class="history-item">
+                    <div class="question">${index + 1}. ${entry.question}</div>
+                    <div class="answer-comparison">
+                        <div class="user-answer">
+                            <strong>Your answer:</strong>
+                            <p>${entry.userAnswer || "<em>Sin respuesta</em>"}</p>
+                        </div>
+                        <div class="correct-answer">
+                            <strong>Correct answer:</strong>
+                            <p>${entry.correctAnswer}</p>
+                        </div>
+                    </div>
+                    <div class="evaluation">
+                        <div>
+                            <strong>Self-assessment:</strong>
+                            <span class="evaluation-badge ${entry.selfEvaluation}">
+                                ${getEvaluationEmoji(entry.selfEvaluation)} ${getEvaluationText(entry.selfEvaluation)}
+                            </span>
+                        </div>
+                        <div>
+                            <strong>Result:</strong>
+                            <span class="evaluation-badge ${entry.actualEvaluation}">
+                                ${getEvaluationEmoji(entry.actualEvaluation)} ${getEvaluationText(entry.actualEvaluation)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="feedback">
+                        <strong>Feedback:</strong> ${entry.feedback}
+                    </div>
+                    <div class="date">
+                        ${entry.date}
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            historyContainer.innerHTML = historyHTML;
+        }
+
+        function getEvaluationEmoji(evaluation) {
+            switch(evaluation) {
+                case 'good':
+                case 'correct':
+                    return '🟢';
+                case 'partial':
+                case 'partially':
+                    return '🟡';
+                case 'bad':
+                case 'incorrect':
+                    return '🔴';
+                default:
+                    return '';
+            }
+        }
+
+        function getEvaluationText(evaluation) {
+            switch(evaluation) {
+                case 'good':
+                    return 'good';
+                case 'partial':
+                    return 'partially good';
+                case 'bad':
+                    return 'wrong';
+                case 'correct':
+                    return 'correct';
+                case 'partially':
+                    return 'partially correct';
+                case 'incorrect':
+                    return 'incorrect';
+                default:
+                    return '';
+            }
+        }
+    </script>
+</body>
+</html>

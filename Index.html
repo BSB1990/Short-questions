@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #dceeff; /* Azul claro */
+            color: #003366; /* Azul oscuro */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        /* Contenedor principal */
+        .container {
+            flex: 1;
+            margin-top: 50px;
+        }
+        /* Imagen de fondo */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://source.unsplash.com/1600x900/?nature,blue') no-repeat center center/cover;
+            opacity: 0.3; /* Hace que la imagen sea sutil */
+            z-index: -1;
+        }
+        /* Botones estilos */
+        .boton {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #007BFF; /* Azul brillante */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s ease-in-out;
+        }
+        /* Efecto al pasar el ratón */
+        .boton:hover {
+            background-color: #0056b3;
+        }
+        /* Pie de página */
+        .footer {
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.1);
+            color: #003366;
+            font-size: 14px;
+        }
+        /* Estilo para la imagen */
+        .imagen-central {
+            display: block;
+            margin: 30px auto;
+            max-width: 90%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 51, 102, 0.2);
+        }
+        /* Espaciado para los textos */
+        h1 {
+            margin-bottom: 25px;
+        }
+        .opciones-texto {
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EU Legal Institutions Practice Hub</h1>
+        
+        <!-- Imagen centrada -->
+        <img src="descarga.jpg" alt="Imagen de bienvenida" class="imagen-central">
+        
+        <p class="opciones-texto">Select an option:</p>
+        <!-- Botón 1 que lleva a "pagina1.html" -->
+        <button class="boton" onclick="window.location.href='Web simplificada preguntas cortas.html'">Short Questions</button>
+        <!-- Botón 2 que lleva a "pagina2.html" -->
+        <button class="boton" onclick="window.location.href='Web simplificada prueba examen.html'">Exam simulation</button>
+    </div>
+    <div class="footer">
+        Código elaborado por Borja Sánchez, Universitat de València, con ayuda de ChatGPT y Claude AI
+    </div>
+</body>
+</html>
